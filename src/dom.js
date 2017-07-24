@@ -14,8 +14,10 @@ var dom = module.exports;
 var env = require("./env");
 var _ = require("./util");
 var consts = require('./const');
+// temp node
 var tNode = document.createElement('div')
 var addEvent, removeEvent;
+// no operation
 var noop = function(){}
 
 var namespaces = consts.NAMESPACE;
@@ -34,6 +36,7 @@ function camelCase(str){
 
 dom.tNode = tNode;
 
+
 if(tNode.addEventListener){
   addEvent = function(node, type, fn) {
     node.addEventListener(type, fn, false);
@@ -50,7 +53,7 @@ if(tNode.addEventListener){
   }
 }
 
-
+// check IE version
 dom.msie = parseInt((/msie (\d+)/.exec(navigator.userAgent.toLowerCase()) || [])[1]);
 if (isNaN(dom.msie)) {
   dom.msie = parseInt((/trident\/.*; rv:(\d+)/.exec(navigator.userAgent.toLowerCase()) || [])[1]);
@@ -87,6 +90,7 @@ dom.inject = function(node, refer, position){
       break;
     case 'top':
       if( firstChild = refer.firstChild ){
+        // eg: var insertedNode = parentNode.insertBefore(newNode, referenceNode);
         refer.insertBefore( node, refer.firstChild );
       }else{
         refer.appendChild( node );
@@ -115,6 +119,7 @@ dom.create = function(type, ns, attrs){
     if(!env.svg) throw Error('the env need svg support')
     ns = namespaces.svg;
   }
+  // https://developer.mozilla.org/zh-CN/docs/Web/API/Document/createElementNS
   return !ns? document.createElement(type): document.createElementNS(ns, type);
 }
 

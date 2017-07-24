@@ -2,6 +2,7 @@
 // ---------------
 var _ = require('./util');
 exports.svg = (function(){
+  // https://developer.mozilla.org/en-US/docs/Web/API/DOMImplementation/hasFeature
   return typeof document !== "undefined" && document.implementation.hasFeature( "http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1" );
 })();
 
