@@ -9,6 +9,10 @@
   
 // inspired by backbone's extend and klass
 var _ = require("../util.js"),
+  // Hong: 测试function serialization是否work，如果work的话，函数会正确转化为字符串，从而
+  //       可以通过/\bsupr\b/正则表达式匹配函数是否使用supr关键字，然后进行相应的封装；如果
+  //       不work，则每个函数都要进行封装，会有一定性能损失，但会保证正确性
+  // 
   fnTest = /xy/.test(function(){"xy";}) ? /\bsupr\b/:/.*/,
   isFn = function(o){return typeof o === "function"};
 
