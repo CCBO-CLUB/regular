@@ -148,7 +148,9 @@ var specialAttr = {
 
 
 // attribute Setter & Getter
+// setter: dom.attr('name', value), getter: dom.attr('name')
 dom.attr = function(node, name, value){
+  // 值为Boolean的属性.eg: selected, disabled...
   if (_.isBooleanAttr(name)) {
     if (typeof value !== 'undefined') {
       if (!!value) {
@@ -162,6 +164,7 @@ dom.attr = function(node, name, value){
         node.removeAttribute(name);
       }
     } else {
+      // getter
       return (node[name] ||
                (node.attributes.getNamedItem(name)|| noop).specified) ? name : undefined;
     }
@@ -193,6 +196,7 @@ dom.on = function(node, type, handler){
   });
   return dom;
 }
+
 dom.off = function(node, type, handler){
   var types = type.split(' ');
   handler = handler.real || handler;
@@ -304,8 +308,11 @@ function fixEventName(elem, name){
 var rMouseEvent = /^(?:click|dblclick|contextmenu|DOMMouseScroll|mouse(?:\w+))$/
 var doc = document;
 doc = (!doc.compatMode || doc.compatMode === 'CSS1Compat') ? doc.documentElement : doc.body;
+
+
 function Event(ev){
   ev = ev || window.event;
+  // 如果已经是包装过的$event, 直接返回
   if(ev._fixed) return ev;
   this.event = ev;
   this.target = ev.target || ev.srcElement;
@@ -337,6 +344,7 @@ function Event(ev){
   }
   this._fixed = true;
 }
+
 
 _.extend(Event.prototype, {
   stop: function(){
