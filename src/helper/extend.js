@@ -11,7 +11,7 @@
 var _ = require("../util.js"),
   // Hong: 测试function serialization是否work，如果work的话，函数会正确转化为字符串，从而
   //       可以通过/\bsupr\b/正则表达式匹配函数是否使用supr关键字，然后进行相应的封装；如果
-  //       不work，则每个函数都要进行封装，会有一定性能损失，但会保证正确性
+  //       不work(一些safari老浏览器)，则每个函数都要进行封装，会有一定性能损失，但会保证正确性
   // 
   fnTest = /xy/.test(function(){"xy";}) ? /\bsupr\b/:/.*/,
   isFn = function(o){return typeof o === "function"};
@@ -30,6 +30,8 @@ var hooks = {
 
 
 function wrap( k, fn, supro ) {
+  // Hong：进行封装，保存旧的supr，然后把supr赋值为父类的同名函数，对函数进行调用，
+  //       然后恢复supr，返回执行结构
   return function () {
     var tmp = this.supr;
     this.supr = supro[k];
@@ -45,6 +47,7 @@ function process( what, o, supro ) {
       if(hooks[k]) {
         hooks[k](o[k], what, supro)
       }
+      // Hong：对于本身和父类都是函数的属性，使用fnTest进行判断重新封装
       what[k] = isFn( o[k] ) && isFn( supro[k] ) && 
         fnTest.test( o[k] ) ? wrap(k, o[k], supro) : o[k];
     }
@@ -58,6 +61,7 @@ module.exports = function extend(o){
   var supr = this, proto,
     supro = supr && supr.prototype || {};
 
+  // Hong: 只在初始化调用过一次？ 对Regular进行扩展处理, 扩展implement和extend
   if(typeof o === 'function'){
     proto = o.prototype;
     o.implement = implement;
@@ -69,6 +73,7 @@ module.exports = function extend(o){
     supr.apply(this, arguments);
   }
 
+  // Hong: 典型的类继承模拟，将fn从supro继承出来
   proto = _.createProto(fn, supro);
 
   function implement(o){
@@ -76,6 +81,7 @@ module.exports = function extend(o){
     var len = mlen;
     for(;len--;){
       var prop = merged[len];
+      // Hong：在原型上检查data和computed? 什么样的使用情况？
       if(proto[prop] && o.hasOwnProperty(prop) && proto.hasOwnProperty(prop)){
         _.extend(proto[prop], o[prop], true) 
         delete o[prop];
