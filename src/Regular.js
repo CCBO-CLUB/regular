@@ -52,6 +52,7 @@ var Regular = function(definition, options){
     delete definition.events;
   }
 
+  // overwrite
   _.extend(this, definition, true);
 
   if(this.$parent){
@@ -68,8 +69,11 @@ var Regular = function(definition, options){
   }
   // if template is a xml
   if(template && template.nodeType) template = template.innerHTML;
+
   if(typeof template === 'string') {
+    // console.log(template);
     template = new Parser(template).parse();
+    // console.log(template);
     if(usePrototyeString) {
     // avoid multiply compile
       this.constructor.prototype.template = template;

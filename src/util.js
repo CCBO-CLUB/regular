@@ -56,7 +56,7 @@ _.nextTick = typeof setImmediate === 'function'?
   }
 
 
-
+// prefix = 'use strict; var d = c.data; e = e || "";'
 _.prefix = "'use strict';var " + _.varName + "=" + _.ctxName + ".data;" +  _.extName  + "=" + _.extName + "||'';";
 
 
@@ -494,6 +494,7 @@ _.fixTagAST = function( tagAST, Component ){
       attr.param = {};
       param.forEach(function( name ){
         if( name in otherAttrMap ){
+          // non-value prop's value set true
           attr.param[name] = otherAttrMap[name] === undefined? true: otherAttrMap[name]
           _.removeOne(attrs, function(attr){
             return attr.name === name

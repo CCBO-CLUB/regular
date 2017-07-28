@@ -168,7 +168,10 @@ gulp.task('v', function(fn){
   }
 })
 
-
+gulp.task('dev', ["build", 'testbundle'], function(){
+  // gulp.watch(['src/**/*.js'], ['build']);
+  gulp.watch(['test/spec/*.js', 'src/**/*.js'], ['jshint', 'build', 'testbundle'])
+})
 
 gulp.task('watch', ["build", 'testbundle'], function(){
   // gulp.watch(['src/**/*.js'], ['build']);

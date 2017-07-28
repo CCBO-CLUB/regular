@@ -3,6 +3,7 @@ var config = require("../config.js");
 
 // some custom tag  will conflict with the Lexer progress
 var conflictTag = {"}": "{", "]": "["}, map1, map2;
+
 // some macro for lexer
 var macro = {
   'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
@@ -23,6 +24,7 @@ function wrapHander(handler){
 }
 
 function Lexer(input, opts){
+  // 处理冲突 tag
   if(conflictTag[config.END]){
     this.markStart = conflictTag[config.END];
     this.markEnd = config.END;
@@ -52,13 +54,15 @@ lo.lex = function(str){
   while(str){
     i++
     state = this.state();
-    split = this.map[state] 
+    split = this.map[state]
     test = split.TRUNK.exec(str);
     if(!test){
       this.error('Unrecoginized Token');
     }
     mlen = test[0].length;
+    // 逐渐slice模板，直到解析完成
     str = str.slice(mlen)
+    //
     token = this._process.call(this, test, split, str)
     if(token) tokens.push(token)
     this.index += mlen;
@@ -104,6 +108,8 @@ lo._process = function(args, split,str){
   }
   return token;
 }
+
+// 新增一个state
 lo.enter = function(state){
   this.states.push(state)
   return this;
@@ -345,7 +351,6 @@ var rules = {
 
 // setup when first config
 Lexer.setup();
-
 
 
 module.exports = Lexer;

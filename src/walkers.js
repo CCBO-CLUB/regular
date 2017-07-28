@@ -319,6 +319,7 @@ walkers.expression = function(ast, options){
   }, OPTIONS.STABLE_INIT )
   return node;
 }
+
 walkers.text = function(ast, options){
   var text = ast.text;
   var node = document.createTextNode(
