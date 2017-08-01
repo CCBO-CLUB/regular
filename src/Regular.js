@@ -1,11 +1,16 @@
 
 var env = require('./env.js');
+// 词法分析
 var Lexer = require("./parser/Lexer.js");
+// 语法分析
 var Parser = require("./parser/Parser.js");
+// 默认配置 BEGIN, END
 var config = require("./config.js");
 var _ = require('./util');
 var extend = require('./helper/extend.js');
 var combine = {};
+
+// 如果在浏览器环境下加载DOM相关API,
 if(env.browser){
   var dom = require("./dom.js");
   var walkers = require('./walkers.js');
@@ -13,9 +18,14 @@ if(env.browser){
   var doc = dom.doc;
   combine = require('./helper/combine.js');
 }
+
+// 事件系统
 var events = require('./helper/event.js');
+// watcher
 var Watcher = require('./helper/watcher.js');
+// parse, return new Parser(template).parse()
 var parse = require('./helper/parse.js');
+// 一些内置的filter. eg: json, last, average, total...
 var filter = require('./helper/filter.js');
 
 
@@ -136,20 +146,27 @@ if (devtools) {
   Regular.prototype.devtools = devtools;
 }
 
+// 
 walkers && (walkers.Regular = Regular);
 
 
 // description
 // -------------------------
 // 1. Regular and derived Class use same filter
+// 为Regular挂载静态属性和方法
 _.extend(Regular, {
   // private data stuff
   _directives: { __regexp__:[] },
   _plugins: {},
   _protoInheritCache: [ 'directive', 'use'] ,
+  /*
+    super: 父构造函数
+    o: 构造函数定义对象
+  */
   __after__: function(supr, o) {
 
     var template;
+    // fn.__after__
     this.__after__ = supr.__after__;
 
     // use name make the component global.
@@ -162,9 +179,10 @@ _.extend(Regular, {
       }
 
       if(template && template.nodeType){
+        // 如果o.name和template的name不同, 会注册两个全局组件?
         if(name = dom.attr(template, 'name')) Regular.component(name, this);
         template = template.innerHTML;
-      } 
+      }
 
       if(typeof template === 'string' ){
         this.prototype.template = config.PRECOMPILE? new Parser(template).parse(): template;
@@ -186,6 +204,7 @@ _.extend(Regular, {
     if(!name) return;
 
     var type = typeof name;
+    // 如果传入类型为Object, 遍历注册directive
     if(type === 'object' && !cfg){
       for(var k in name){
         if(name.hasOwnProperty(k)) this.directive(k, name[k]);
@@ -281,6 +300,7 @@ _.extend(Regular, {
 
 });
 
+// 添加 Regular.implement 和 Regular.extend 方法
 extend(Regular);
 
 Regular._addProtoInheritCache("component")
@@ -289,8 +309,16 @@ Regular._addProtoInheritCache("filter", function(cfg){
   return typeof cfg === "function"? {get: cfg}: cfg;
 })
 
+/*
+Event.mixTo = function(obj){
+  obj = typeof obj === "function" ? obj.prototype : obj;
+  _.extend(obj, API)
+}
 
+API:{ $on, $off }
+*/
 events.mixTo(Regular);
+// 同上
 Watcher.mixTo(Regular);
 
 Regular.implement({

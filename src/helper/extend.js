@@ -13,7 +13,7 @@ var _ = require("../util.js"),
   //       可以通过/\bsupr\b/正则表达式匹配函数是否使用supr关键字，然后进行相应的封装；如果
   //       不work(一些safari老浏览器)，则每个函数都要进行封装，会有一定性能损失，但会保证正确性
   // 
-  fnTest = /xy/.test(function(){"xy";}) ? /\bsupr\b/:/.*/,
+  fnTest = /xy/.test(function(){"xy";}) ? /\bsupr\b/ : /.*/,
   isFn = function(o){return typeof o === "function"};
 
 var hooks = {
@@ -41,6 +41,12 @@ function wrap( k, fn, supro ) {
   }
 }
 
+// proto, o, supro
+/* 
+  what
+  o  构造函数options
+  supero 
+*/
 function process( what, o, supro ) {
   for ( var k in o ) {
     if (o.hasOwnProperty(k)) {
@@ -65,6 +71,7 @@ module.exports = function extend(o){
   if(typeof o === 'function'){
     proto = o.prototype;
     o.implement = implement;
+    // Regular.extend = extend;
     o.extend = extend;
     return o;
   } 
@@ -74,6 +81,7 @@ module.exports = function extend(o){
   }
 
   // Hong: 典型的类继承模拟，将fn从supro继承出来
+  // proto是一个构造函数prototype指向supro的实例
   proto = _.createProto(fn, supro);
 
   function implement(o){
@@ -82,8 +90,13 @@ module.exports = function extend(o){
     for(;len--;){
       var prop = merged[len];
       // Hong：在原型上检查data和computed? 什么样的使用情况？
+      /* 
+        如果原型和当前object上都有data, computed, 进行一次重写
+        相当于新的构造函数使用新的默认值
+      */
       if(proto[prop] && o.hasOwnProperty(prop) && proto.hasOwnProperty(prop)){
-        _.extend(proto[prop], o[prop], true) 
+        _.extend(proto[prop], o[prop], true)
+        // 删除重复属性
         delete o[prop];
       }
     }
@@ -97,6 +110,7 @@ module.exports = function extend(o){
 
   fn.implement = implement
   fn.implement(o)
+
   if(supr.__after__) supr.__after__.call(fn, supr, o);
   fn.extend = extend;
   return fn;

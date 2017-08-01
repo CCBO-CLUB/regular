@@ -1491,12 +1491,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	
 	var env = __webpack_require__(1);
+	// 词法分析
 	var Lexer = __webpack_require__(10);
+	// 语法分析
 	var Parser = __webpack_require__(11);
+	// 默认配置 BEGIN, END
 	var config = __webpack_require__(8);
 	var _ = __webpack_require__(2);
 	var extend = __webpack_require__(13);
 	var combine = {};
+
+	// 如果在浏览器环境下加载DOM相关API,
 	if(env.browser){
 	  var dom = __webpack_require__(14);
 	  var walkers = __webpack_require__(16);
@@ -1504,9 +1509,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var doc = dom.doc;
 	  combine = __webpack_require__(18);
 	}
+
+	// 事件系统
 	var events = __webpack_require__(21);
+	// watcher
 	var Watcher = __webpack_require__(22);
+	// parse, return new Parser(template).parse()
 	var parse = __webpack_require__(23);
+	// 一些内置的filter. eg: json, last, average, total...
 	var filter = __webpack_require__(24);
 
 
@@ -1627,20 +1637,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Regular.prototype.devtools = devtools;
 	}
 
+	// 
 	walkers && (walkers.Regular = Regular);
 
 
 	// description
 	// -------------------------
 	// 1. Regular and derived Class use same filter
+	// 为Regular挂载静态属性和方法
 	_.extend(Regular, {
 	  // private data stuff
 	  _directives: { __regexp__:[] },
 	  _plugins: {},
 	  _protoInheritCache: [ 'directive', 'use'] ,
+	  /*
+	    super: 父构造函数
+	    o: 构造函数定义对象
+	  */
 	  __after__: function(supr, o) {
 
 	    var template;
+	    // fn.__after__
 	    this.__after__ = supr.__after__;
 
 	    // use name make the component global.
@@ -1653,9 +1670,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      if(template && template.nodeType){
+	        // 如果o.name和template的name不同, 会注册两个全局组件?
 	        if(name = dom.attr(template, 'name')) Regular.component(name, this);
 	        template = template.innerHTML;
-	      } 
+	      }
 
 	      if(typeof template === 'string' ){
 	        this.prototype.template = config.PRECOMPILE? new Parser(template).parse(): template;
@@ -1677,6 +1695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if(!name) return;
 
 	    var type = typeof name;
+	    // 如果传入类型为Object, 遍历注册directive
 	    if(type === 'object' && !cfg){
 	      for(var k in name){
 	        if(name.hasOwnProperty(k)) this.directive(k, name[k]);
@@ -1772,6 +1791,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	});
 
+	// 添加 Regular.implement 和 Regular.extend 方法
 	extend(Regular);
 
 	Regular._addProtoInheritCache("component")
@@ -1780,8 +1800,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return typeof cfg === "function"? {get: cfg}: cfg;
 	})
 
+	/*
+	Event.mixTo = function(obj){
+	  obj = typeof obj === "function" ? obj.prototype : obj;
+	  _.extend(obj, API)
+	}
 
+	API:{ $on, $off }
+	*/
 	events.mixTo(Regular);
+	// 同上
 	Watcher.mixTo(Regular);
 
 	Regular.implement({
@@ -3315,7 +3343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //       可以通过/\bsupr\b/正则表达式匹配函数是否使用supr关键字，然后进行相应的封装；如果
 	  //       不work(一些safari老浏览器)，则每个函数都要进行封装，会有一定性能损失，但会保证正确性
 	  // 
-	  fnTest = /xy/.test(function(){"xy";}) ? /\bsupr\b/:/.*/,
+	  fnTest = /xy/.test(function(){"xy";}) ? /\bsupr\b/ : /.*/,
 	  isFn = function(o){return typeof o === "function"};
 
 	var hooks = {
@@ -3343,6 +3371,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
+	// proto, o, supro
+	/* 
+	  what
+	  o  构造函数options
+	  supero 
+	*/
 	function process( what, o, supro ) {
 	  for ( var k in o ) {
 	    if (o.hasOwnProperty(k)) {
@@ -3367,6 +3401,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if(typeof o === 'function'){
 	    proto = o.prototype;
 	    o.implement = implement;
+	    // Regular.extend = extend;
 	    o.extend = extend;
 	    return o;
 	  } 
@@ -3376,6 +3411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  // Hong: 典型的类继承模拟，将fn从supro继承出来
+	  // proto是一个构造函数prototype指向supro的实例
 	  proto = _.createProto(fn, supro);
 
 	  function implement(o){
@@ -3384,8 +3420,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for(;len--;){
 	      var prop = merged[len];
 	      // Hong：在原型上检查data和computed? 什么样的使用情况？
+	      /* 
+	        如果原型和当前object上都有data, computed, 进行一次重写
+	        相当于新的构造函数使用新的默认值
+	      */
 	      if(proto[prop] && o.hasOwnProperty(prop) && proto.hasOwnProperty(prop)){
-	        _.extend(proto[prop], o[prop], true) 
+	        _.extend(proto[prop], o[prop], true)
+	        // 删除重复属性
 	        delete o[prop];
 	      }
 	    }
@@ -3399,6 +3440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  fn.implement = implement
 	  fn.implement(o)
+
 	  if(supr.__after__) supr.__after__.call(fn, supr, o);
 	  fn.extend = extend;
 	  return fn;
@@ -5052,9 +5094,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.$on(i, event[i], fn);
 	      }
 	    }else{
+	      // Hong: $once即是通过添加desc通过$on来实现的
 	      desc = desc || {};
 	      // @patch: for list
 	      var context = this;
+	      // Hong: handles 存储所有事件，每个类型对应一个数组calls
 	      var handles = context._handles || (context._handles = {}),
 	        calls = handles[event] || (handles[event] = []);
 	      var realFn;
@@ -5072,6 +5116,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  $off: function(event, fn) {
 	    var context = this;
 	    if(!context._handles) return;
+	    // Hong: 如果不指定事件类型，就全部取消；
+	    //       不指定具体的函数，就把指定类型的函数全部取消
+	    //       指定具体的函数，就查询比较并取消
 	    if(!event) this._handles = {};
 	    var handles = context._handles,
 	      calls;
@@ -5101,6 +5148,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var type = event;
 
 	    if(!handles) return context;
+	    // Hong: 对于所有绑定的指定类型的函数进行遍历执行
+	    //       分别调用剔除第一个字符的回调，以及完整名字注册的回调
+	    //       比如$destroy，会分别调用destroy和$destroy
 	    if(calls = handles[type.slice(1)]){
 	      for (var j = 0, len = calls.length; j < len; j++) {
 	        calls[j].apply(context, args)

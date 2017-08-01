@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Regular.js • TODO-MVC</title>
-  <link rel="stylesheet" href="https://rawgit.com/tastejs/todomvc-common/v0.1.11/base.css">
   <script src="../../dist/regular.js"></script>
 </head>
 <body>
@@ -71,9 +70,11 @@
     });
 
     var Todo = Regular.extend({
-      data: {},
+      data: {
+      },
       template: "#todo",
-      init: function(){}
+      init: function(){
+      }
     });
     
 
@@ -89,6 +90,7 @@
             localStorage.setItem('items',JSON.stringify(this.data.items))
           })
         }
+        this.show();
       },
       // get the list;
       getList: function(filter){
@@ -96,6 +98,9 @@
         else return this.data.items.filter(function(item){
           return filter === 'completed'? item.completed : !item.completed;
         });
+      },
+      show: function(){
+        console.log('default show')
       },
       // toggle all todo's completed state
       toggleAll: function(sign){
@@ -114,7 +119,6 @@
         var data = this.data;
         data.items.unshift({description: editTodo});
         data.editTodo = "";
-        console.log("asdf")
       },
       // remove a todo
       remove: function(index){
@@ -133,6 +137,12 @@
           })
           return items
         }
+      }
+    })
+
+    TodoApp.implement({
+      show: function() {
+        console.log('overwrite show');
       }
     })
 
